@@ -1,0 +1,2 @@
+# MusicLynx
+Discord Music Bot
