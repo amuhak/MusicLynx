@@ -386,25 +386,6 @@ async def on_message(message):
                                              "bradley hate is the best hate","bradley? that guy's a bozo","Bradley? lol what a doofus"]))
      await bot.process_commands(message)
 
-#SSSHHHHH#SSSHHHHH#SSSHHHHH
-#SSSHHHHH#SSSHHHHH
-#SSSHHHHH
-@bot.event
-async def on_message_delete(message):
-     if not message.author.bot:
-          logs = open(f'Logs {message.guild}.txt', 'a')
-          logs.write(f"Deleted by [{message.author}] at [{message.created_at}] in [{message.channel}]: {message.content.strip()}\n")
-          logs.close()
-@bot.event
-async def on_message_edit(before, after):
-     if not before.author.bot:
-          logs = open(f'Logs {before.guild}.txt', 'a')
-          logs.write(f"Edited by [{before.author}] at [{after.created_at}] in [{before.channel}]: Before: {before.content.strip()} After: {after.content.strip()}\n")
-          logs.close()
-#SSSHHHHH
-#SSSHHHHH#SSSHHHHH
-#SSSHHHHH#SSSHHHHH#SSSHHHHH
-
 @bot.command(name = "sing", help = "Sings songs!")
 async def sing(ctx, *, song_name):
      global singing
