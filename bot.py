@@ -13,6 +13,7 @@ from fuzzywuzzy import process
 #functional
 import asyncio
 import random
+import typing
 
 #genius client
 from lyricsgenius import Genius
@@ -21,9 +22,9 @@ from lyricsgenius import Genius
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-#SSSHHHH
-logs = open('logs.txt', 'a')
-#SSSHHHH
+#meme
+import requests
+import urllib
 
 #Getting tokens
 load_dotenv()
@@ -39,6 +40,8 @@ from discord import app_commands
 from discord.utils import get
 from discord import FFmpegPCMAudio
 from discord import TextChannel
+from typing import List
+from typing import Optional
 
 #Setting up discord client
 intents = discord.Intents.all()
@@ -65,30 +68,63 @@ async def on_ready():
     try:
         #sync application commands
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} command")
+        print(f"Synced {len(synced)} commands")
     except Exception as e:
         print(e)
+
+#setting up imgflip for /meme
+username = 'MusicLynx'
+password = os.environ.get('imgflip')
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) \ AppleWebKit/537.36 (KHTML, like Gecko) \ Chrome/120.0.0.0 Safari/537.36"
+
+data = requests.get('https://api.imgflip.com/get_memes').json()['data']['memes']
+images = [{'name':image['name'],'url':image['url'],'id':image['id']} for image in data]
+meme_names = []
+for image in images:
+     meme_names.append(image['name'])
 
 #get command help
 @bot.tree.command(name = "lynx_help")
 async def help(interaction: discord.Interaction):
      await interaction.response.send_message(f"""
 **Disclaimer**: the player disconnects frequently from YT's end, so there's little i can do to fix that. sorry.
-`/link` links to a song.\n
-`/join` you have to get the bot to join a voice channel before it can play. if it's having errors, always try to run this first.\n
-`/play song:` plays the song you enter. ideal format: [artist] [song] [explicit/clean]. queues song if something's already playing\n
-'/queue action:[clear/view]' prints or clears the queue\n
-`/resume` resumes playing song.\n
-`/pause` pauses song.\n
+`/link` links to a song.
+`/join` you have to get the bot to join a voice channel before it can play. if it's having errors, always try to run this first.
+`/play song:` plays the song you enter. ideal format: [artist] [song] [explicit/clean]. queues song if something's already playing.
+`/queue action:[clear/view]` prints or clears the queue.
+`/resume` resumes playing song.
+`/pause` pauses song.
+`/skip` skips song.
 `/stop` stops playing and leaves the vc.\n
-`!sing` sends the lyrics of the song you enter one-by-one. use carefully, or you might get banned :D\n
-`!shout` SHOUTS the lyrics of the song you enter one-by-one. use carefully, or you might get banned :D\n 
-`!stop_lyrics` stops sending lyrics.\n
-`!time` adjusts the time between each line\n\n
-`!preach` spits straight facts.\n
-`!nerd user` when someone is being far too much of a nerd, nerd them.\n
-pls use responsibly.
+`!sing` sends the lyrics of the song you enter one-by-one. use carefully, or you might get banned :D
+`!shout` SHOUTS the lyrics of the song you enter one-by-one. use carefully, or you might get banned :D
+`!stop_lyrics` stops sending lyrics.
+`!time` adjusts the time between each line\n
+`!preach` spits straight facts.
+`!nerd user` when someone is being far too much of a nerd, nerd them.
+`/doggo` summons a random doggo pic.
+`/8ball` answers questions by harnessing the peak reasoning abilities of a UGA student.\n
+`/bradley_hate` disables/enables the bradley-hate features if you have perms.\n
+`!updates` gets the latest updates and new features!\n
+pls use me responsibly.
 """)
+     
+fax = ["CS majors should get free deodorant", "It's not immoral if you make six figures", "To Hell With Georgia",
+       "I don't talk to UGA grads often, but when I do, I ask for large fries", "MIT is GT of the North", "Touch grass, buddy", 
+       "mods are nepo smh", "The art and the artist are separate", "Dobby is a free elf", "PJO >>", "The laws of physics don't apply to SRK", 
+       "The 'clay' in 'Mlepclaynos' is silent", "You heard about Pluto? That's messed up right?", "You the king, burger king", 
+       "I have two rules. Rule one: I'm always right. Rule two: If I'm wrong, refer to rule one…",
+       "I just love the smell of C4 in the morning.", "It smell like gaaas, I think somebody poo", "I take my shirt off and all the hoes stop breathin'",
+       "Deutschland > France", "SLATT", "Fuck UGA ong", "Fuck UGA ong", "Fuck UGA ong", "Fuck UGA", "Fuck UGA", "GT>>", "GT>>",
+       "Pickup trucks are for idiots", "Bhupendra Jogi", "The best racism is Formula 1", "Lewis Hamilton is the greatest racist of all time",
+       "Messi is the :goat:", "Messi > Ronaldo", "LeBron is my pookie", "LeBron GOAT", "Real football is played with the feet", "American Eggball != Football",
+       "Lucas Luwa teaches CS1331", "Georgia _ech is _he bes_ ", "OJ is innocent- orange juice can't commit crimes", "ತೆಲುಗು ವಿಚಿತ್ರ ಭಾಷೆ ಫ್ರ",
+       "OO is a myth.", "It's pronounced 'Chad' Starner", "you = :nerd:", ":nerd:", "you = :nerd:", ":moyai:", ":moyai:",
+       "I'm really happy for you, Imma let you finish, but Beyoncé had one of the best videos of all time!", "Man U will always be dogshit", "Barca > Madrid",
+       "Bayern cheat", "Animal testing is a crime", "Math majors have no life purpose" , "The existence of Ivan Allen is a myth", "East Campus is better",
+       "Willage is overrated", "Coffee is a performance drug\nPerformance drugs are the best!", "Willage is overrated", "Everyone secretly wishes they were in CS",
+       "OOS students worked harder to get here ¯\_(ツ)_/¯", "Georgia > Florida", "Bigotry is **not** cool", "If I get bleach on my t-shirt, Imma feel like an asshole",
+       "992 > 991", "Macans are not Porsches", "SUVs are dumb", "SAT > ACT"]
 
 #utility function to get urls from search term
 def get_links(query):
@@ -134,7 +170,7 @@ async def link(interaction: discord.Interaction, song: str):
 def get_top_result_url(query):
      results = YoutubeSearch((query + " audio"), max_results=10).to_dict()
      top_result_url = 'https://music.youtube.com' + results[0]['url_suffix']
-     return top_result_url
+     return {'url' : top_result_url, 'title' : results[0]['title'], 'thumbnail' : results[0]['thumbnails'][0]}
 
 # command for bot to join the channel of the user, if the bot has already joined and is in a different channel, it will move to the channel the user is in
 @bot.tree.command(name = "join")
@@ -196,26 +232,31 @@ async def play(interaction: discord.Interaction, song: str):
      
      #try-catch to handle vc errors and whatnot
      try:
-          url = get_top_result_url(song)
-          song_url = url
+          yt = get_top_result_url(song)
+          song_url = yt["url"]
+          embed = discord.Embed(title = yt['title'], url = song_url, description = 'Song added to queue')
+          embed.set_author(name = f"queued by {interaction.user.display_name}", icon_url=interaction.user.display_avatar)
+          embed.set_image(url = yt['thumbnail'])
           #making sure the bot isn't already playing
           if (not voice.is_playing()) or (len(queue[interaction.guild.id])<1):
-               song = (queue[interaction.guild.id].pop(0))
-               url = get_top_result_url(song)
-               song_url = url
-               ydl_opts = {'format': 'bestaudio'}
+               song = queue[interaction.guild.id].pop(0)
+               yt = get_top_result_url(song)
+               song_url = yt["url"]
+               embed = discord.Embed(title = yt['title'], url = song_url, description = 'Song playing now')
+               embed.set_author(name = f"played by {interaction.user.display_name}", icon_url=interaction.user.display_avatar)
+               embed.set_image(url = yt['thumbnail'])
                with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-                    info = ydl.extract_info(url, download=False)
+                    info = ydl.extract_info(song_url, download=False)
                     url2 = info['url']
                # Play the audio stream
                voice.is_playing()
                id = interaction.guild.id
                voice.play(discord.FFmpegPCMAudio(url2,before_options=FFMPEG_OPTIONS), after = lambda e: play_recur(voice, (queue[id].pop(0)), id))
-               await interaction.followup.send(f"playing now\n{song_url}")
+               await interaction.followup.send(f"playing now", embed=embed)
                # check if the bot is already playing
           else:
                #a little message to the user
-               await interaction.followup.send(f"added to queue\n{song_url}")
+               await interaction.followup.send(f"added to queue", embed=embed)
                return
      except Exception as e:
           #doesn't work great without this block for some reason
@@ -226,37 +267,34 @@ async def play(interaction: discord.Interaction, song: str):
                await interaction.followup.send(f"playing now\n{song_url}")
 
 @bot.tree.command(name = "queue")
-@app_commands.describe(action = "i'll do this to queue")
-async def get_queue(interaction: discord.Interaction, action: str):
+@app_commands.choices(action=[
+     app_commands.Choice(name="View", value="view"),
+     app_commands.Choice(name="Clear", value="clear"),
+])
+async def get_queue(interaction: discord.Interaction, action: app_commands.Choice[str]):
      global queue
      global queue_info
      await interaction.response.defer()
-     action = process.extractOne(action, ["view","clear"])
-     if action[1] <= 40:
-          await interaction.followup.send("sorry, please tell me whether to view or clear the queue")
+     if action == "clear":
+          queue[interaction.guild.id] = []
+          await interaction.followup.send("queue cleared!")
      else:
-          action = action[0]
-          if action == "clear":
-               queue[interaction.guild.id] = []
-               await interaction.followup.send("queue cleared!")
-          else:
-               song_titles = []
-               for i, song in enumerate(queue[interaction.guild.id]):
-                    results = YoutubeSearch((song + " audio"), max_results=10).to_dict()
-                    title = results[0]['title']
-                    user_id = queue_info[interaction.guild.id][i]
-                    song_titles.append(f"{i+1}) **{title}**- added by <@{user_id}>")
-               song_titles = "\n".join(song_titles)
-               await interaction.followup.send(song_titles)
+          song_titles = []
+          for i, song in enumerate(queue[interaction.guild.id]):
+               results = YoutubeSearch((song + " audio"), max_results=10).to_dict()
+               title = results[0]['title']
+               user_id = queue_info[interaction.guild.id][i]
+               song_titles.append(f"{i+1}) **{title}**- added by <@{user_id}>")
+          song_titles = "\n".join(song_titles)
+          await interaction.followup.send(song_titles)
 
 #recurring command to play from queue
 def play_recur(voice, song, id):
      print(song)
-     url = get_top_result_url(song)
+     url = get_top_result_url(song)["url"]
      YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist': 'True'}
      FFMPEG_OPTIONS = {
           'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'}
-     song_url = url
      with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
           info = ydl.extract_info(url, download=False)
           url2 = info['url']
@@ -266,8 +304,6 @@ def play_recur(voice, song, id):
           voice.play(discord.FFmpegPCMAudio(url2,before_options=FFMPEG_OPTIONS), after = lambda e: play_recur(voice, queue[id].pop(0), id))
      except:
           pass
-
-
 
 # command to resume voice if it is paused
 @bot.tree.command(name = "resume")
@@ -303,6 +339,85 @@ async def stop(interaction: discord.Interaction):
      except:
           await interaction.response.send_message("error. the bot might not be in a vc")
 
+#command to skip song
+#yet to implement voteskip
+@bot.tree.command(name = "skip")
+async def skip(interaction: discord.Interaction):
+     global queue
+     voice = get(bot.voice_clients, guild=interaction.guild)
+     try:
+          await voice.stop()
+          play_recur(voice, queue[interaction.guild.id].pop(0))
+          await interaction.response.send_message("skipped")
+     except:
+          await interaction.response.send_message("skipped")
+
+#fun
+
+@bot.tree.command(name = "8ball")
+@app_commands.describe(question = "I'll answer this question")
+async def skip(interaction: discord.Interaction, question: str):
+
+     await interaction.response.defer()
+
+     answer = random.choice(["It is certain", "Reply hazy, try again", "Don’t count on it", "It is decidedly so", "Ask again later", 
+                             "My reply is no", "Without a doubt", "Better not tell you now", "My sources say no", "Yes definitely", 
+                             "Cannot predict now", "Outlook not so good", "You may rely on it", "Concentrate and ask again", 
+                             "Very doubtful", "As I see it, yes", "Most likely", "Outlook good", "Yes", "Signs point to yes"])
+     await asyncio.sleep(3)
+     
+     await interaction.followup.send(f"**Magic 8-ball**\nQuestion: `{question}`\nMagic 8-ball's Answer: `{answer}`")
+
+@bot.tree.command(name = "meme")
+@app_commands.describe(template = "Template to use", line1 = "First line of meme", line2 = "Second line of meme", line3 = "Optional third line", line4 = "Optional fourth line")
+async def meme(interaction: discord.Interaction, template : str, line1 : str, line2 : str, line3 : str = None, line4 : str = None):
+     await interaction.response.defer()
+     URL = 'https://api.imgflip.com/caption_image'
+     id = meme_names.index(template)
+     boxes = [{"text":line1},{"text":line2},{"text":line3},{"text":line4}]
+     params = {
+     'username':username,
+     'password':password,
+     'template_id':images[id]['id'],
+     "boxes[0][text]": line1,
+     "boxes[1][text]": line2,
+     "boxes[2][text]": line3,
+     "boxes[3][text]": line4,
+     }
+     response = requests.request('POST',URL,params=params).json()
+     opener = urllib.request.URLopener()
+     opener.addheader('User-Agent', user_agent)
+     try:
+          filename, headers = opener.retrieve(response['data']['url'], 'meme.jpg')
+     except Exception as e:
+          print(e)
+     with open('meme.jpg','rb') as img:
+          picture = discord.File(img)
+          await interaction.followup.send(f"made by <@{interaction.user.id}>",file = picture)
+
+@meme.autocomplete("template")
+async def template_autocomplete(interaction: discord.Interaction, current: str) -> typing.List[app_commands.Choice[str]]:
+     data = []
+     for template_choice in meme_names:
+          if current.lower() in template_choice.lower():
+               data.append(app_commands.Choice(name = template_choice, value = template_choice))
+     return data
+
+#show meme templates
+@bot.tree.command(name = "meme_templates")
+async def list_templates(interaction : discord.Interaction):
+     template_names = "\n".join(meme_names)
+     await interaction.response.send_message(f"# Templates\n{template_names}", ephemeral=True)
+
+
+#send a random photo of a dog
+doggo_credits = [("Meru", 799447829856780289), ("Meru", 799447829856780289), ("Meru", 799447829856780289)]
+@bot.tree.command(name = "doggo")
+async def skip(interaction: discord.Interaction):
+     rand = random.randint(1,4)
+     with open(f'dog{rand}.png', 'rb') as img:
+          picture = discord.File(img)
+          await interaction.response.send_message(f"{doggo_credits[rand-1][0]}, <@{doggo_credits[rand-1][1]}>'s doggo.", file=picture)
 
 #SINGING FUNCTIONALITY#
  
@@ -360,9 +475,36 @@ def clean(lyrics):
         
      return return_lyrics
 
+bradley_hate = False
+
+@bot.tree.command(name = "bradley_hate")
+@app_commands.choices(choices=[
+     app_commands.Choice(name="Disable", value="disable"),
+     app_commands.Choice(name="Enable", value="enable"),
+])
+async def control_bradley_hate(interaction: discord.Interaction, choices: app_commands.Choice[str]):
+     global bradley_hate
+     global fax
+     authorized = [286225309773070336, 799447829856780289, 651632296440365087, 694310264295915560, 549393343583485962, 946196592074031165]
+     if interaction.user.id in authorized:
+          if choices.value == "enable":
+               bradley_hate = True
+               await interaction.response.send_message("Bradley hate set to `enabled`")
+               fax.extend(("Bradley is a loser", "Bradley is a loser", "Bradley is a loser", "Bradley is a loser"))
+          else:
+               await interaction.response.send_message("Bradley hate set to `disabled`")
+               if bradley_hate:
+                    fax = fax[0:len(fax)-4]
+               bradley_hate = False
+     else:
+          await interaction.response.send_message("you don't have the perms for that buddy")
+
 #checking if the next line should skipping
 @bot.event
 async def on_message(message):
+     global bradley_hate
+
+     #line-skipping
      global current_line
      global skip
      if not message.author.bot:
@@ -370,6 +512,7 @@ async def on_message(message):
                skip = True
                #logging the skip to console
                print(f"Skipping!: '{message.content}' as '{current_line}'")
+
      #checking if the sender of a message has been "nerded"
      if message.author.id in nerded:
           #incrementing number of messages sent while nerded
@@ -379,11 +522,20 @@ async def on_message(message):
           #rremoving from nerd directory if the 4 messages have already been reacted to
           if nerded[message.author.id] >= 2:
                del nerded[message.author.id]
-     insult = random.randint(0,3)
-     message_core = message.content.lower().strip()
-     if (("bradley" in message_core) or ("🅱️radley" in message_core) or ("🇧 radley" in message_core ) or ("748540576651280454" in message_core)) and (not message.author.bot) and (insult != 3):
-          await message.reply(random.choice(["Bradley? lol, what a loser","Bradley? lol, what a loser","lmao bradley L","don't summon bradley, he'll start talking about rust or something",
-                                             "bradley hate is the best hate","bradley? that guy's a bozo","Bradley? lol what a doofus"]))
+     
+     #responding to pings
+     mention = f'<@{1196931379129241600}>'
+     if mention in message.content:
+          remark = random.choice(["wassup?", "you called?", "ayyy, what's good?", "yo", ":moyai:", "ay yo", "aiyyooo... why ping me", "yeah?"])
+          await message.reply(f'{remark} use /lynx_help to get to know me better.')
+
+     #bradley hate
+     if bradley_hate:
+          insult = random.randint(0,2)
+          message_core = message.content.lower().strip()
+          if (("bradley" in message_core) or ("🅱️radley" in message_core) or ("🇧 radley" in message_core ) or ("748540576651280454" in message_core)) and (not message.author.bot) and (insult != 2):
+               await message.reply(random.choice(["Bradley? lol, what a loser","Bradley? lol, what a loser","lmao bradley L","don't summon bradley, he'll start talking about rust or something",
+                                                  "bradley hate is the best hate","bradley? that guy's a bozo","Bradley? lol what a doofus"]))
      await bot.process_commands(message)
 
 @bot.command(name = "sing", help = "Sings songs!")
@@ -500,25 +652,9 @@ async def stop_lyrics(ctx):
      singing = False
      await ctx.send("ok. I'll stop 😕")
 
-fax = ["CS majors should get free deodorant", "It's not immoral if you make six figures", "Bradley is a loser", "Bradley is a loser",
-       "Bradley is a loser", "Bradley is a loser", "To Hell With Georgia",
-       "I don't talk to UGA grads often, but when I do, I ask for large fries", "MIT is GT of the North", "Touch grass, buddy", 
-       "mods are nepo smh", "The art and the artist are separate", "Dobby is a free elf", "PJO >>", "The laws of physics don't apply to SRK", 
-       "The 'clay' in 'Mlepclaynos' is silent", "You heard about Pluto? That's messed up right?", "You the king, burger king", 
-       "I have two rules. Rule one: I'm always right. Rule two: If I'm wrong, refer to rule one…",
-       "I just love the smell of C4 in the morning.", "It smell like gaaas, I think somebody poo", "I take my shirt off and all the hoes stop breathin'",
-       "Deutschland > France", "SLATT", "Fuck UGA ong", "Fuck UGA ong", "Fuck UGA ong", "Fuck UGA", "Fuck UGA", "GT>>", "GT>>",
-       "Pickup trucks are for idiots", "Bhupendra Jogi", "The best racism is Formula 1", "Lewis Hamilton is the greatest racist of all time",
-       "Messi is the :goat:", "Messi > Ronaldo", "LeBron is my pookie", "LeBron GOAT", "Real football is played with the feet", "American Eggball != Football",
-       "Lucas Luwa teaches CS1331", "Georgia _ech is _he bes_ ", "OJ is innocent- orange juice can't commit crimes", "ತೆಲುಗು ವಿಚಿತ್ರ ಭಾಷೆ ಫ್ರ",
-       "OO is a myth.", "It's pronounced 'Chad' Starner", "you = :nerd:", ":nerd:", "you = :nerd:", ":moyai:", ":moyai:",
-       "I'm really happy for you, Imma let you finish, but Beyoncé had one of the best videos of all time!", "Man U will always be dogshit", "Barca > Madrid",
-       "Bayern cheat", "Animal testing is a crime", "Math majors have no life purpose" , "The existence of Ivan Allen is a myth", "East Campus is better",
-       "Willage is overrated", "Coffee is a performance drug\nPerformance drugs are the best!", "Willage is overrated", "Everyone secretly wishes they were in CS",
-       "OOS students worked harder to get here ¯\_(ツ)_/¯", "Georgia > Florida", "Bigotry is **not** cool", "If I get bleach on my t-shirt, Imma feel like an asshole",
-       "992 > 991", "Macans are not Porsches", "SUVs are dumb", "SAT > ACT"]
 @bot.command(name = "preach")
 async def preach(ctx):
+     global fax
      await ctx.send(random.choice(fax))
 
 #send reaction when bean
@@ -545,5 +681,27 @@ async def nerd(ctx, member: discord.Member):
      else:
           nerded[member.id] = 0
           await ctx.send(f"# <@{member.id}> = :nerd:")
+
+@bot.command(name = "aarush")
+async def aarush(ctx):
+     server_members = ctx.guild.members
+     tags = []
+     for member in server_members:
+          if "aarush" in (member.display_name.strip()).lower():
+               tags.append(member.id)
+     chosen_aarush = random.choice(tags)
+     await ctx.send(f"an aarush -> <@{chosen_aarush}>")
+
+@bot.command(name = "updates")
+async def updates_message(ctx):
+     updates_str = ("""**Update 3.0! by <@799447829856780289>**\n
+Added `!aarush`, which randomly pings an aarush from the server.
+Added `/skip`, which enables skipping a currently playing a song.
+Added `/bradley_hate` which allows mods and my creator to disable or enable the Bradley-hating features. They will be disabled by default from now on :(
+Added `/8ball` which replicates the peak logical prowess of a UGA student to help you make decisions.
+Added `/doggo` which posts a random pic of a doggo! Pls share yours.
+Added a placeholder function for `\meme`. in the future, this command will allow you to generate your own memes!
+""")
+     await ctx.send(updates_str)
      
 bot.run(TOKEN)
