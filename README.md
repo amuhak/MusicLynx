@@ -1,3 +1,3 @@
 # MusicLynx
-Discord Music Bot
+Discord Music Bot  
 Avid Bradley Hater
