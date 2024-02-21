@@ -758,6 +758,7 @@ async def on_message(message):
             print(f"Skipping!: '{message.content}' as '{current_line}'")
 
         # gt28-only feature
+        """
         if message.guild.id == 1182890708265357392:
             pings_str = ""
             words_str = ""
@@ -772,6 +773,33 @@ async def on_message(message):
                 await ask_boomers.send(
                     f"{words_str}mentioned by <@{message.author.id}>, pinging {pings_str}, {message.jump_url}",
                     silent=True)
+        """
+
+        # NEW CODE 🎉🎉🎉 (You will need to test this)
+        if message.guild.id == 1182890708265357392:
+            to_ping = []
+            why_ping = []
+            for word in ping_info:
+                if word in message.content.lower():
+                    if ping_info[word] is list:
+                        for id in ping_info[word]:
+                            why_ping.append(word)
+                            to_ping.append(id)
+                    elif ping_info[word] is str:
+                        why_ping.append(word)
+                        to_ping.append(ping_info[word])
+                    else:
+                        print("Error: ping_info[word] is neither a list nor a string. This should not happen. What the"
+                              "hell did you do?")
+            if to_ping:
+                ask_boomers = discord.utils.get(message.guild.channels, name="bot-commands")
+                string_to_send = f"<@{message.author.id}> mentioned:\n"
+                if len(why_ping) != len(to_ping):
+                    print(f"Error: why_ping, {why_ping} and to_ping, {to_ping} are not the same length. This should "
+                          f"not happen.")
+                for why, to in zip(why_ping, to_ping):
+                    string_to_send += f"- {why}, pinging <@{why}>\n"
+                await ask_boomers.send(string_to_send + f"{message.jump_url}", silent=True)
 
         # deprecated checking method
 
