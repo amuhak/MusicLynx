@@ -780,17 +780,16 @@ async def on_message(message):
             to_ping = []
             why_ping = []
             for word in ping_info:
-                if word in message.content.lower():
+                if word.lower() in message.content.lower():
                     if ping_info[word] is list:
                         for id in ping_info[word]:
                             why_ping.append(word)
                             to_ping.append(id)
-                    elif ping_info[word] is str:
+                    elif ping_info[word] is int:
                         why_ping.append(word)
                         to_ping.append(ping_info[word])
                     else:
-                        print("Error: ping_info[word] is neither a list nor a string. This should not happen. What the"
-                              "hell did you do?")
+                        print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
             if to_ping:
                 ask_boomers = discord.utils.get(message.guild.channels, name="bot-commands")
                 string_to_send = f"<@{message.author.id}> mentioned:\n"
