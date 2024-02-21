@@ -92,22 +92,22 @@ async def on_ready():
                 # logging[info]["logging_channel"] = logging[info]["logging_channel"].replace("<","")
                 # logging[info]["logging_channel"] = logging[info]["logging_channel"].replace(">","")
 
-            logging[info]["logging_channel"] = int(logging[info]["logging_channel"])
+                logging[info]["logging_channel"] = int(logging[info]["logging_channel"])
+    except Exception as e:
+        print("logging file empty", e)
+    try:
+        with open("pinginfo.json", "r") as read_file:
+            global ping_info
+            ping_info = json.load(read_file)
+        to_delete = []
+        for word in ping_info:
+            if ping_info[word] == None:
+                to_delete.append(word)
+        for delete in to_delete:
+            del ping_info[delete]
+    except Exception as e:
+        print("ping file empty", e)
 
-except Exception as e:
-print("logging file empty", e)
-try:
-    with open("pinginfo.json", "r") as read_file:
-        global ping_info
-        ping_info = json.load(read_file)
-    to_delete = []
-    for word in ping_info:
-        if ping_info[word] == None:
-            to_delete.append(word)
-    for delete in to_delete:
-        del ping_info[delete]
-except Exception as e:
-    print("ping file empty", e)
 
 # setting up imgflip for /meme
 username = 'MusicLynx'
