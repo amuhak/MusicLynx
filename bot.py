@@ -210,7 +210,7 @@ def get_links(query):
         genius_url = genius_song['result']['url']
     except Exception as e:
         print(e)
-        genius_url = "genius search failed, sry"
+        genius_url = "genius search failed"
 
     # return the genius url, the spotify url, and the genius song object
     return genius_url, spotify_url, genius_song
@@ -220,9 +220,42 @@ def get_links(query):
 @bot.tree.command(name="link", description="links to the song given in the query")
 @app_commands.describe(song="I'll link to this song!")
 async def link(interaction: discord.Interaction, song: str):
-    genius_link, spotify_link, _ignore = get_links(song)
-    await interaction.response.send_message(f"Genius: {genius_link}\nSpotify: {spotify_link}")
+    # parsing my janky lil return string
+    song = song.split("é")
+    song_name = song[1]
+    spotify_link = song[0]
 
+
+    hits = genius.search_songs(song_name)
+    # if the search is successful, this'll get changed later
+    genius_song = "Genius Search Failed"
+    hits = hits["hits"]
+
+    # making sure that the two results match closely. genius search can be weird.
+    try:
+        for hit in hits:
+            genius_title = hit['result']['title']
+            spotify_title = song_name
+            if fuzz.ratio(str(genius_title), str(spotify_title)) > 60:
+                genius_song = hit
+                break
+        genius_url = genius_song['result']['url']
+    except Exception as e:
+        print(e)
+        genius_url = "Genius search failed"
+    
+    await interaction.response.send_message(f"Genius: {genius_url}\nSpotify: {spotify_link}")
+
+@link.autocomplete("song")
+async def template_autocomplete(interaction: discord.Interaction, current: str) -> typing.List[
+    app_commands.Choice[str]]:
+    data = []
+    # getting results from spotify client
+    results = sp.search(q=current, type="track", limit=8)
+    for song in results['tracks']['items']:
+        if current.lower() in song["name"].lower():
+            data.append(app_commands.Choice(name = f'{song["name"]}- {song["artists"][0]["name"]}', value = f'{song["external_urls"]["spotify"]}é{song["name"]}'))
+    return data
 
 # get top url for a query in YT
 def get_top_result_url(query):
@@ -758,6 +791,23 @@ async def on_message(message):
             print(f"Skipping!: '{message.content}' as '{current_line}'")
 
         # gt28-only feature
+        """
+        if message.guild.id == 1182890708265357392:
+            pings_str = ""
+            words_str = ""
+            for word in ping_info:
+                if word in message.content.lower():
+                    words_str += f"- {word}\n"
+                    for id in ping_info[word]:
+                        if str(id) not in pings_str:
+                            pings_str += f"<@{id}>"
+            if pings_str != "":
+                ask_boomers = channel = discord.utils.get(message.guild.channels, name="bot-commands")
+                await ask_boomers.send(
+                    f"{words_str}mentioned by <@{message.author.id}>, pinging {pings_str}, {message.jump_url}",
+                    silent=True)
+        """
+
         # amuhak's checker 🎉🎉🎉
         if (message.guild.id == 1182890708265357392) and (not message.flags.silent):
                to_ping = []
@@ -780,6 +830,20 @@ async def on_message(message):
                                    to_ping.append(ping_info[word])
                          else:
                               print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
+
+        # deprecated checking method
+
+        # message_list = [word.lower() for word in message.content.split()]
+        # pings_str = ""
+        # words_str = ""
+        # for word in message_list:
+        #      if word in ping_info:
+        #           words_str += f"- {word}\n"
+        #           for id in ping_info[word]:
+        #                if str(id) not in pings_str:
+        #                     pings_str += f"<@{id}>"
+        # if pings_str != "":
+        #      await message.channel.send(f"{words_str}mentioned by <@{message.author.id}>, pinging {pings_str}", silent = True)
 
     # checking if the sender of a message has been "nerded"
     if message.author.id in nerded:
@@ -1119,15 +1183,20 @@ async def nerd(ctx, member: discord.Member):
         nerded[member.id] = 0
         await ctx.send(f"# <@{member.id}> = :nerd:")
 
+last_aarush = 0
 
 @bot.command(name="aarush", help="pings a random aarush")
 async def aarush(ctx):
+    global last_aarush
     server_members = ctx.guild.members
     tags = []
     for member in server_members:
         if "aarush" in (member.display_name.strip()).lower():
             tags.append(member.id)
     chosen_aarush = random.choice(tags)
+    while chosen_aarush == last_aarush:
+        chosen_aarush = random.choice(tags)
+    last_aarush = chosen_aarush
     await ctx.send(f"an aarush -> <@{chosen_aarush}>")
 
 
