@@ -775,30 +775,28 @@ async def on_message(message):
                     silent=True)
         """
 
-        # NEW CODE 🎉🎉🎉 (You will need to test this)
-        if message.guild.id == 1182890708265357392:
-            to_ping = []
-            why_ping = []
-            for word in ping_info:
-                if word.lower() in message.content.lower():
-                    if ping_info[word] is list:
-                        for id in ping_info[word]:
-                            why_ping.append(word)
-                            to_ping.append(id)
-                    elif ping_info[word] is int:
-                        why_ping.append(word)
-                        to_ping.append(ping_info[word])
-                    else:
-                        print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
-            if to_ping:
-                ask_boomers = discord.utils.get(message.guild.channels, name="bot-commands")
-                string_to_send = f"<@{message.author.id}> mentioned:\n"
-                if len(why_ping) != len(to_ping):
-                    print(f"Error: why_ping, {why_ping} and to_ping, {to_ping} are not the same length. This should "
-                          f"not happen.")
-                for why, to in zip(why_ping, to_ping):
-                    string_to_send += f"- {why}, pinging <@{why}>\n"
-                await ask_boomers.send(string_to_send + f"{message.jump_url}", silent=True)
+        # amuhak's checker 🎉🎉🎉
+        if (message.guild.id == 1182890708265357392) and (not message.flags.silent):
+               to_ping = []
+               why_ping = []
+               for word in ping_info:
+                    if word.lower() in message.content.lower():
+                         if type(ping_info[word]) is list:
+                              for id in ping_info[word]:
+                                   # print(ping_info[word], message.author.id)
+                                   why_ping.append(word)
+                                   to_ping.append(id)
+                                   try:
+                                        to_ping.remove(message.author.id)
+                                   except:
+                                        pass
+                         elif ping_info[word] is int:
+                              if message.author.id != ping_info[word]:
+                                   print(ping_info[word], message.author.id)
+                                   why_ping.append(word)
+                                   to_ping.append(ping_info[word])
+                         else:
+                              print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
 
         # deprecated checking method
 
