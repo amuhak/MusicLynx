@@ -225,7 +225,6 @@ async def link(interaction: discord.Interaction, song: str):
     song_name = song[1]
     spotify_link = song[0]
 
-
     hits = genius.search_songs(song_name)
     # if the search is successful, this'll get changed later
     genius_song = "Genius Search Failed"
@@ -243,8 +242,9 @@ async def link(interaction: discord.Interaction, song: str):
     except Exception as e:
         print(e)
         genius_url = "Genius search failed"
-    
+
     await interaction.response.send_message(f"Genius: {genius_url}\nSpotify: {spotify_link}")
+
 
 @link.autocomplete("song")
 async def template_autocomplete(interaction: discord.Interaction, current: str) -> typing.List[
@@ -254,8 +254,10 @@ async def template_autocomplete(interaction: discord.Interaction, current: str) 
     results = sp.search(q=current, type="track", limit=8)
     for song in results['tracks']['items']:
         if current.lower() in song["name"].lower():
-            data.append(app_commands.Choice(name = f'{song["name"]}- {song["artists"][0]["name"]}', value = f'{song["external_urls"]["spotify"]}é{song["name"]}'))
+            data.append(app_commands.Choice(name=f'{song["name"]}- {song["artists"][0]["name"]}',
+                                            value=f'{song["external_urls"]["spotify"]}é{song["name"]}'))
     return data
+
 
 # get top url for a query in YT
 def get_top_result_url(query):
@@ -809,27 +811,32 @@ async def on_message(message):
         """
 
         # amuhak's checker 🎉🎉🎉
+        import re
+        def regex_match(word, message):
+            # \W<word>|^<word>
+            return bool(re.match((r'\W' + word + r'|^' + word), message))
+
         if (message.guild.id == 1182890708265357392) and (not message.flags.silent):
-               to_ping = []
-               why_ping = []
-               for word in ping_info:
-                    if word.lower() in message.content.lower():
-                         if type(ping_info[word]) is list:
-                              for id in ping_info[word]:
-                                   # print(ping_info[word], message.author.id)
-                                   why_ping.append(word)
-                                   to_ping.append(id)
-                                   try:
-                                        to_ping.remove(message.author.id)
-                                   except:
-                                        pass
-                         elif ping_info[word] is int:
-                              if message.author.id != ping_info[word]:
-                                   print(ping_info[word], message.author.id)
-                                   why_ping.append(word)
-                                   to_ping.append(ping_info[word])
-                         else:
-                              print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
+            to_ping = []
+            why_ping = []
+            for word in ping_info:
+                if regex_match(word.lower(), message.content.lower()):
+                    if type(ping_info[word]) is list:
+                        for id in ping_info[word]:
+                            # print(ping_info[word], message.author.id)
+                            why_ping.append(word)
+                            to_ping.append(id)
+                            try:
+                                to_ping.remove(message.author.id)
+                            except:
+                                pass
+                    elif ping_info[word] is int:
+                        if message.author.id != ping_info[word]:
+                            print(ping_info[word], message.author.id)
+                            why_ping.append(word)
+                            to_ping.append(ping_info[word])
+                    else:
+                        print(f"Error: ping_info[word] is neither a list nor a int it is {type(ping_info[word])}")
 
         # deprecated checking method
 
@@ -1183,7 +1190,9 @@ async def nerd(ctx, member: discord.Member):
         nerded[member.id] = 0
         await ctx.send(f"# <@{member.id}> = :nerd:")
 
+
 last_aarush = 0
+
 
 @bot.command(name="aarush", help="pings a random aarush")
 async def aarush(ctx):
